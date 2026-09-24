@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.aes
+*_encrypted.*
+*_decrypted.*
+Key.txt
