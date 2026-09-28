@@ -1,5 +1,5 @@
 # The cipher itself uses only the standard library. These are for pictures and the demo script.
-numpy>=1.24
+numpy>=2.5.3
 opencv-python>=4.8
 
 # Optional: enables the extra cross-check tests against a reference AES implementation.
