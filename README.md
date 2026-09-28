@@ -1,5 +1,7 @@
 # AES-128 from scratch
 
+[![CI](https://github.com/BlackStarKos/aes-from-scratch/actions/workflows/ci.yml/badge.svg)](https://github.com/BlackStarKos/aes-from-scratch/actions/workflows/ci.yml) [MIT license](LICENSE) · [Security policy](SECURITY.md)
+
 A from-scratch implementation of AES-128 in pure Python (FIPS 197), with CBC mode, password-based keys, and
 authenticated encryption, used to encrypt text, pictures and video.
 

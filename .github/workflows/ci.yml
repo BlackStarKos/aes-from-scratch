@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege: nothing in this workflow needs to write to the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: unit tests (python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run the test suite (standard library only, no third-party packages)
+        run: python -m unittest -v test_aes
+
+  cross-check:
+    name: cross-check against the cryptography package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install the pinned reference implementation
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
+      - name: Run the test suite including the reference cross-checks
+        run: python -m unittest -v test_aes
+
+  ci:
+    name: ci
+    if: always()
+    needs: [test, cross-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every job to have passed
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+          XCHECK_RESULT: ${{ needs.cross-check.result }}
+        run: |
+          echo "unit tests: $TEST_RESULT"
+          echo "cross-check: $XCHECK_RESULT"
+          [ "$TEST_RESULT" = "success" ] && [ "$XCHECK_RESULT" = "success" ]

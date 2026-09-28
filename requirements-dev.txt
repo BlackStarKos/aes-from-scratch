@@ -1,0 +1,3 @@
+# Reference implementation used only by the optional cross-check tests in test_aes.py.
+# Pinned so the CI run is reproducible; Dependabot proposes updates.
+cryptography==50.0.1
